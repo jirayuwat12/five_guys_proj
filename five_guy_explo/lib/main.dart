@@ -8,6 +8,7 @@ void main() {
 
 MaterialApp MyApp() {
   return MaterialApp(
+    debugShowCheckedModeBanner: false,
     home: RootPage(),
   );
 }

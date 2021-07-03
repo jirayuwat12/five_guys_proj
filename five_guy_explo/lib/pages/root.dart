@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:five_guy_explo/theme/themecolor.dart';
 import 'package:five_guy_explo/pages/explo_page.dart';
+import 'package:five_guy_explo/pages/top_place_page.dart';
+import 'package:five_guy_explo/pages/saved_place_page.dart';
+import 'package:five_guy_explo/pages/settting_page.dart';
 
 class RootPage extends StatefulWidget {
   RootPage({Key? key}) : super(key: key);
@@ -30,8 +33,8 @@ class _RootPageState extends State<RootPage> {
           ? "assets/images/star_act.png"
           : "assets/images/star_unact.png",
       pageIndex == 2
-          ? "assets/images/commu_act.png"
-          : "assets/images/commu_unact.png",
+          ? "assets/images/bookmark_act.png"
+          : "assets/images/try_error_1.png",
       pageIndex == 3
           ? "assets/images/settings_act.png"
           : "assets/images/settings_unact.png",
@@ -69,7 +72,7 @@ class _RootPageState extends State<RootPage> {
   Widget makeBody() {
     return IndexedStack(
       index: pageIndex,
-      children: [ExploPage(), ExploPage(), ExploPage(), ExploPage()],
+      children: [ExploPage(), TopPlacePage(), SavedPlacePage(), SettingPage()],
     );
   }
 }
