@@ -1,12 +1,10 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_tindercard/flutter_tindercard.dart';
 
 import 'package:five_guy_explo/theme/themecolor.dart';
-import 'package:five_guy_explo/data/explore_json.dart';
+import 'package:flutter/material.dart';
 
-bool save = false;
+import 'package:flutter_tindercard/flutter_tindercard.dart';
+import 'package:five_guy_explo/data/explore_json.dart';
 
 class ExploPage extends StatefulWidget {
   @override
@@ -22,7 +20,6 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     setState(() {
-      //load data to explo json here
       itemsTemp = explore_json;
       itemLength = explore_json.length;
     });
@@ -32,14 +29,11 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MainColor,
-      body: makeBody(),
-      bottomSheet: makeBottomSheet(),
+      body: getBody(),
     );
   }
 
-  Widget makeBody() {
-    int nowpos = 0;
-    String nowid = "";
+  Widget getBody() {
     var size = MediaQuery.of(context).size;
 
     return Padding(
@@ -48,19 +42,18 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
         height: size.height,
         child: TinderSwapCard(
           totalNum: itemLength,
-          stackNum: 3,
           maxWidth: MediaQuery.of(context).size.width,
           maxHeight: MediaQuery.of(context).size.height * 0.75,
           minWidth: MediaQuery.of(context).size.width * 0.75,
           minHeight: MediaQuery.of(context).size.height * 0.6,
           cardBuilder: (context, index) => Container(
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(color: Colors.grey, blurRadius: 5, spreadRadius: 2),
                 ]),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(10),
               child: Stack(
                 children: [
                   Container(
@@ -75,7 +68,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Container(
                         decoration:
-                            BoxDecoration(color: Colors.black.withOpacity(0.4)),
+                            BoxDecoration(color: Colors.white.withOpacity(0)),
                       ),
                     ),
                   ),
@@ -99,13 +92,9 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.asset(
-                                  itemsTemp[index]['img'],
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.7,
-                                ),
+                              Image.asset(
+                                itemsTemp[index]['img'],
+                                width: MediaQuery.of(context).size.width * 0.7,
                               )
                             ],
                           ),
@@ -169,107 +158,17 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
           cardController: controller = CardController(),
           swipeUpdateCallback: (DragUpdateDetails details, Alignment align) {
             if (align.x < 0) {
-              nowpos = -1;
-            } else if (align.x > 0) {
-              nowpos = 1;
-            }
+            } else if (align.x > 0) {}
           },
           swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
-            print(itemsTemp);
-            nowid = itemsTemp[index]['id'];
-            if (save) {
-              print('save');
-              saveIdPlace(nowid);
-            } else {
-              print('not save');
-            }
-            print(index);
             if (index == (itemsTemp.length - 1)) {
               setState(() {
                 itemLength = itemsTemp.length - 1;
               });
             }
-            save = false;
           },
         ),
       ),
     );
-  }
-
-  saveIdPlace(String placeID) async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    dynamic saved = pref.getString('saved_place');
-    if (saved == null) saved = "";
-    saved = saved + ',' + placeID;
-    pref.setString('saved_place', saved);
-    print(saved);
-  }
-
-  Widget makeBottomSheet() {
-    var size = MediaQuery.of(context).size;
-    return Container(
-        width: size.width,
-        height: 120,
-        decoration: BoxDecoration(color: Colors.transparent),
-        child: Padding(
-          padding: EdgeInsets.only(left: 40, right: 40, bottom: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Material(
-                shadowColor: Colors.grey,
-                child: IconButton(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  icon: Image.asset(
-                    'assets/images/check.png',
-                    width: 25,
-                    height: 25,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      controller.triggerLeft();
-                    });
-                  },
-                ),
-              ),
-              Material(
-                shadowColor: Colors.grey,
-                child: IconButton(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  icon: Image.asset(
-                    'assets/images/cancel-mark.png',
-                    width: 25,
-                    height: 25,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      controller.triggerRight();
-                    });
-                  },
-                ),
-              ),
-              Material(
-                shadowColor: Colors.grey,
-                child: IconButton(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  icon: Image.asset(
-                    'assets/images/bookmark.png',
-                    width: 25,
-                    height: 25,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      save = true;
-                      controller.triggerLeft();
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-        ));
   }
 }
