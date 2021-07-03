@@ -55,12 +55,12 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
           minHeight: MediaQuery.of(context).size.height * 0.6,
           cardBuilder: (context, index) => Container(
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(color: Colors.grey, blurRadius: 5, spreadRadius: 2),
                 ]),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(30),
               child: Stack(
                 children: [
                   Container(
@@ -75,7 +75,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Container(
                         decoration:
-                            BoxDecoration(color: Colors.white.withOpacity(0)),
+                            BoxDecoration(color: Colors.black.withOpacity(0.4)),
                       ),
                     ),
                   ),
@@ -99,9 +99,13 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Image.asset(
-                                itemsTemp[index]['img'],
-                                width: MediaQuery.of(context).size.width * 0.7,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.asset(
+                                  itemsTemp[index]['img'],
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.7,
+                                ),
                               )
                             ],
                           ),
@@ -171,6 +175,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
             }
           },
           swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
+            print(itemsTemp);
             nowid = itemsTemp[index]['id'];
             if (save) {
               print('save');
@@ -178,8 +183,8 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
             } else {
               print('not save');
             }
+            print(index);
             if (index == (itemsTemp.length - 1)) {
-              //out of the list
               setState(() {
                 itemLength = itemsTemp.length - 1;
               });

@@ -66,12 +66,12 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
         padding: const EdgeInsets.all(8.0),
         child: Container(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(color: Colors.grey, blurRadius: 5, spreadRadius: 2),
               ]),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(20),
             child: Stack(
               children: [
                 Container(
@@ -85,7 +85,7 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
                       decoration:
-                          BoxDecoration(color: Colors.white.withOpacity(0)),
+                          BoxDecoration(color: Colors.black.withOpacity(0.4)),
                     ),
                   ),
                 ),
@@ -106,9 +106,12 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.asset(
-                              data['img'],
-                              width: MediaQuery.of(context).size.width * 0.3,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.asset(
+                                data['img'],
+                                width: MediaQuery.of(context).size.width * 0.3,
+                              ),
                             )
                           ],
                         ),
