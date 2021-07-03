@@ -188,7 +188,7 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
   Future<String> _getList() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
 
-    dynamic temp = pref.getString('saved_place');
+    dynamic temp = pref.getString('saved place');
     //print("temp = " + temp);
     if (temp == null)
       return "";

@@ -1,4 +1,4 @@
-const List explore_json = [
+List explore_json = [
   {
     "id": "thilo",
     "img": "assets/images/places/img1.png",
