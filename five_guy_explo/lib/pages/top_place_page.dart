@@ -41,7 +41,7 @@ class _TopPlacePageState extends State<TopPlacePage> {
             width: 30,
           ),
           Text(
-            'Top unknow place',
+            'Top unknown place',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ],

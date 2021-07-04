@@ -1,0 +1,6 @@
+key             desc        type        format
+
+user name       username    <String>
+got item        got item    <String>    >format>>,___,___,...
+saved place     saved place <String>    >format>>,__,__,...
+avatar order    order avatar<int>       
