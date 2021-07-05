@@ -1,3 +1,3 @@
 # five_guys_proj
 
-the project is on 'master brach'
+the project is on 'master branch'
