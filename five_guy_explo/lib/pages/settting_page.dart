@@ -90,24 +90,32 @@ class _SettingPageState extends State<SettingPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: List.generate(avatarURL.length,
-                                        (index) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          print(index);
-                                          setState(() {
-                                            avatarOrder = index;
-                                            set_avatar_order();
-                                          });
-                                        },
-                                        child: CircleAvatar(
-                                          backgroundImage:
-                                              NetworkImage(avatarURL[index]),
-                                        ),
-                                      );
-                                    }),
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: List.generate(avatarURL.length,
+                                          (index) {
+                                        return GestureDetector(
+                                          onTap: () {
+                                            print(index);
+                                            setState(() {
+                                              avatarOrder = index;
+                                              set_avatar_order();
+                                            });
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: CircleAvatar(
+                                              radius: 20,
+                                              backgroundImage: NetworkImage(
+                                                  avatarURL[index]),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),

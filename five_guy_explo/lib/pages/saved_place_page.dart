@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'package:five_guy_explo/fiveguys_sdk.dart';
 import 'package:five_guy_explo/theme/themecolor.dart';
 import 'package:five_guy_explo/data/explore_json.dart';
 import 'package:five_guy_explo/pages/comment_page.dart';
@@ -26,11 +27,11 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
       backgroundColor: MainColor,
       body: FutureBuilder(
         future: _getList(),
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
           //print("data = " + snapshot.data.toString());
           if (snapshot.hasData) {
             //print("inif =" + snapshot.data.toString());
-            return buildCard(snapshot.data.toString());
+            return buildCard(snapshot.data);
           } else {
             return Center(
               child: CircularProgressIndicator(),
@@ -41,6 +42,7 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
     );
   }
 
+  List<Place> data = [];
   Widget buildCard(String list) {
     if (list == "")
       return Center(
@@ -56,13 +58,16 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
         temp += list[i];
       }
     }
+    print("list ID like now");
     print(listID);
     List<Widget> cardlist = [];
+    getdata(listID);
 
-    for (int i = 0; i < listID.length; i++) {
-      Map<String, dynamic> data = getdata(listID[i]);
+    for (int i = 0; i < data.length; i++) {
+      // List<Place> data = await getdata(listID[i]);
       //testt
-      data = explore_json[0];
+      print('data get from like list');
+      print(data);
       cardlist.add(GestureDetector(
         onTap: () {
           //print('before' + data['id']);
@@ -70,7 +75,7 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
               context,
               MaterialPageRoute(
                   builder: (context) =>
-                      CommentPage(post_id: data['id'].toString())));
+                      CommentPage(post_id: data[i].id.toString())));
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -89,7 +94,7 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
                     height: 200,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: NetworkImage(data['image_url']),
+                          image: NetworkImage(data[i].imageUrl),
                           fit: BoxFit.cover),
                     ),
                     child: BackdropFilter(
@@ -123,7 +128,7 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
                                 child: Image.network(
-                                  data['image_url'],
+                                  data[i].imageUrl,
                                   width:
                                       MediaQuery.of(context).size.width * 0.3,
                                 ),
@@ -144,7 +149,7 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
                                     Row(
                                       children: [
                                         Text(
-                                          data['name'],
+                                          data[i].name,
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 20,
@@ -156,7 +161,7 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
                                       ],
                                     ),
                                     Text(
-                                      'latitude ' + data['lat'].toString(),
+                                      'latitude ' + data[i].lat.toString(),
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         color: Colors.white,
@@ -164,7 +169,7 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
                                       ),
                                     ),
                                     Text(
-                                      'longitude ' + data['lon'].toString(),
+                                      'longitude ' + data[i].lon.toString(),
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         color: Colors.white,
@@ -190,25 +195,41 @@ class _SavedPlacePageState extends State<SavedPlacePage> {
         ),
       ));
     }
+    //while (listID.length != cardlist.length)
+    //  Future.delayed(Duration(seconds: 1));
     return ListView(
       children: cardlist,
     );
   }
 
-  Map<String, dynamic> getdata(String id) {
-    Map<String, dynamic> ret = {};
-    return ret;
+  getdata(List<String> id) async {
+    //data.clear();
+    data = await getPlacesByID(id);
+    // for (int i = 0; i < id.length; i++) {
+    //   List<Place> l = await getPlacesByID([id[i]]);
+    //   data.add(l[0]);
+    // }
   }
 
   Future<String> _getList() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
 
-    dynamic temp = pref.getString('saved place');
+    dynamic list = pref.getString('saved place');
     //print("temp = " + temp);
-    if (temp == null)
-      return "";
-    else {
-      return temp;
+
+    List<String> listID = [];
+    String temp = "";
+    for (int i = 1; i <= list.length; i++) {
+      if (i == list.length || list[i] == ',') {
+        listID.add(temp);
+        temp = "";
+      } else {
+        temp += list[i];
+      }
     }
+    getdata(listID);
+    print("list ID like now");
+    print(listID);
+    return list;
   }
 }

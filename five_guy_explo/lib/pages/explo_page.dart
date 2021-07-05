@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:five_guy_explo/theme/themecolor.dart';
 import 'package:five_guy_explo/data/explore_json.dart';
+import 'package:five_guy_explo/fiveguys_sdk.dart';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +13,7 @@ final GlobalKey<SwipeStackState> _swipeKey = GlobalKey<SwipeStackState>();
 bool explopagesave = false;
 int gbindex = 0;
 bool reload = false;
+int lastgbindex = -1;
 
 class ExploPage extends StatefulWidget {
   @override
@@ -36,6 +38,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
     );
   }
 
+  List<Place> tmpexplo = [];
   //load data from server and save to explore_json
   updateExploJson() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -44,23 +47,27 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
         : "";
     List<String> got_id_list = got.split(',');
     //API work and save to explo_json
-
-    print("explo len" + explore_json.length.toString());
+    //print('startget');
+    //print(got_id_list);
+    // getPlaces([]).then((value) => print(value));
+    tmpexplo = await getPlaces(got_id_list);
+    //print('tmpexplo');
+    //print(tmpexplo);
+    //print("explo len" + explore_json.length.toString());
     //end API work
+
     //save id that got from all time
-    List tmpexplo = explore_json;
     for (int i = 0; i < tmpexplo.length; i++) {
-      got += ',' + tmpexplo[i]['id'];
+      got += ',' + tmpexplo[i].id;
     }
     prefs.setString('got item', got);
   }
 
   //generate list<SwiperItem> use in swipe card
-  generateList() {
+  generateList(List<SwiperItem> old) {
     var size = MediaQuery.of(context).size;
 
-    List<SwiperItem> list = [];
-    List tmpexplo = explore_json;
+    List<SwiperItem> list = old;
 
     for (int index = 0; index < tmpexplo.length; index++) {
       list.add(SwiperItem(builder: (SwiperPosition position, double progress) {
@@ -80,7 +87,9 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                   height: size.height,
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: NetworkImage(tmpexplo[index]['image_url']),
+                        image: NetworkImage(
+                          tmpexplo[index].imageUrl,
+                        ),
                         fit: BoxFit.cover),
                   ),
                   child: BackdropFilter(
@@ -111,7 +120,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: Image.network(
-                                tmpexplo[index]['image_url'],
+                                tmpexplo[index].imageUrl,
                                 width: MediaQuery.of(context).size.width * 0.7,
                               ),
                             )
@@ -131,7 +140,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                                     Row(
                                       children: [
                                         Text(
-                                          tmpexplo[index]['name'],
+                                          tmpexplo[index].name,
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 26,
@@ -144,7 +153,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                                     ),
                                     Text(
                                       'latitude ' +
-                                          tmpexplo[index]['lat'].toString(),
+                                          tmpexplo[index].lat.toString(),
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
@@ -152,7 +161,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                                     ),
                                     Text(
                                       'longitude ' +
-                                          tmpexplo[index]['lon'].toString(),
+                                          tmpexplo[index].lon.toString(),
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
@@ -184,6 +193,8 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
         ? ""
         : pref.getString('saved place').toString();
     saved += ',' + id;
+    print('saved');
+    print(saved);
     pref.setString('saved place', saved);
   }
 
@@ -195,20 +206,21 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       List<SwiperItem> list = [];
       updateExploJson();
-      list = generateList();
+      list = generateList(list);
       //API work
 
       //end of API work
       yield list;
       while (true) {
         await Future.delayed(Duration(seconds: 1));
-        if (gbindex % 10 == 9 && reload) {
+        if (gbindex % 2 == 0 && gbindex != lastgbindex) {
+          print('reloading');
           updateExploJson();
-          list = generateList();
+          list = generateList(list);
+          print(list);
           reload = false;
+          lastgbindex = gbindex;
           yield list;
-        } else if (gbindex % 10 != 9) {
-          reload = true;
         }
       }
     })();
@@ -226,26 +238,29 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                   stackFrom: StackFrom.Bottom,
                   translationInterval: 6,
                   scaleInterval: 0.03,
-                  onEnd: () => debugPrint("onEnd"),
+                  onEnd: () {
+                    if (gbindex % 2 != 0) gbindex++;
+                  },
                   onSwipe: (int index, SwiperPosition position) {
-                    print(gbindex);
+                    print(tmpexplo[index].name);
                     gbindex++;
+                    print("gb index now" + gbindex.toString());
                     debugPrint("onSwipe $index $position");
                     if (position == SwiperPosition.Right) {
                       //know this >> cancel button
                       explopagesave = false;
                     } else {
                       //dont know >> right button
+                      unknown(tmpexplo[index].id);
                       if (explopagesave) {
                         //save ID
                         explopagesave = false;
-                        print(explore_json[index]['id']);
-                        saveIdplace(explore_json[index]['id']);
+                        saveIdplace(tmpexplo[index].id);
                       }
                     }
                     //time to relaod
-                    if (gbindex % 10 == 9) {
-                      print('reloading');
+                    if (gbindex % 2 == 0) {
+                      //print('reloading');
                     }
                   },
                   children: snapshot.data == null ? [] : snapshot.data,
