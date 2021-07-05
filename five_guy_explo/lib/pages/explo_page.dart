@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:five_guy_explo/data/explo_page_util.dart';
 import 'package:five_guy_explo/theme/themecolor.dart';
 import 'package:five_guy_explo/data/explore_json.dart';
 import 'package:five_guy_explo/fiveguys_sdk.dart';
@@ -24,9 +25,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      updateExploJson();
-    });
+    updateExploJson();
   }
 
   @override
@@ -38,153 +37,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
     );
   }
 
-  List<Place> tmpexplo = [];
-  //load data from server and save to explore_json
-  updateExploJson() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String got = prefs.getString('got item') != null
-        ? prefs.getString('got item').toString()
-        : "";
-    List<String> got_id_list = got.split(',');
-    //API work and save to explo_json
-    //print('startget');
-    //print(got_id_list);
-    // getPlaces([]).then((value) => print(value));
-    tmpexplo = await getPlaces(got_id_list);
-    //print('tmpexplo');
-    //print(tmpexplo);
-    //print("explo len" + explore_json.length.toString());
-    //end API work
-
-    //save id that got from all time
-    for (int i = 0; i < tmpexplo.length; i++) {
-      got += ',' + tmpexplo[i].id;
-    }
-    prefs.setString('got item', got);
-  }
-
   //generate list<SwiperItem> use in swipe card
-  generateList(List<SwiperItem> old) {
-    var size = MediaQuery.of(context).size;
-
-    List<SwiperItem> list = old;
-
-    for (int index = 0; index < tmpexplo.length; index++) {
-      list.add(SwiperItem(builder: (SwiperPosition position, double progress) {
-        //make tinder like card
-        return Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(color: Colors.grey, blurRadius: 5, spreadRadius: 2),
-              ]),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
-            child: Stack(
-              children: [
-                Container(
-                  width: size.width,
-                  height: size.height,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: NetworkImage(
-                          tmpexplo[index].imageUrl,
-                        ),
-                        fit: BoxFit.cover),
-                  ),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      decoration:
-                          BoxDecoration(color: Colors.black.withOpacity(0.4)),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: size.width,
-                  height: size.height,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [
-                    Colors.black.withOpacity(0.25),
-                    Colors.black.withOpacity(0),
-                  ], end: Alignment.topCenter, begin: Alignment.bottomCenter)),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                tmpexplo[index].imageUrl,
-                                width: MediaQuery.of(context).size.width * 0.7,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(15),
-                        child: Row(
-                          children: [
-                            Flexible(
-                              child: Container(
-                                width: size.width * 0.72,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          tmpexplo[index].name,
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 26,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      'latitude ' +
-                                          tmpexplo[index].lat.toString(),
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    Text(
-                                      'longitude ' +
-                                          tmpexplo[index].lon.toString(),
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-        );
-      }));
-    }
-    return list;
-  }
 
   //store the ID of place that user save
   saveIdplace(String id) async {
@@ -202,11 +55,11 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
   Widget getBody() {
     var size = MediaQuery.of(context).size;
     //use stream bc data will change when go to index%10 = 9
-    final Stream<List<SwiperItem>> _list = (() async* {
+    final Stream<List<Place>> _list = (() async* {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<SwiperItem> list = [];
+      List<Place> list = [];
       updateExploJson();
-      list = generateList(list);
+      list = listPlaceShow;
       //API work
 
       //end of API work
@@ -216,7 +69,7 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
         if (gbindex % 2 == 0 && gbindex != lastgbindex) {
           print('reloading');
           updateExploJson();
-          list = generateList(list);
+          list = listPlaceShow;
           print(list);
           reload = false;
           lastgbindex = gbindex;
@@ -226,23 +79,32 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
     })();
     return Padding(
       padding: const EdgeInsets.only(bottom: 120),
-      child: StreamBuilder<List<SwiperItem>>(
+      child: StreamBuilder<List<Place>>(
           //listn to _list valiable
           stream: _list,
           builder: (context, snapshot) {
+            List<SwiperItem> swiperList = [];
+            if (!snapshot.hasData) {
+            } else {
+              for (int i = 0; i < listPlaceShow.length; i++) {
+                print('adding swiper item');
+                swiperList.add(makeSwiperItem(i, context));
+              }
+            }
             return Container(
                 height: size.height,
                 child: SwipeStack(
                   key: _swipeKey,
-                  visibleCount: 2,
+                  visibleCount: 3,
                   stackFrom: StackFrom.Bottom,
-                  translationInterval: 6,
-                  scaleInterval: 0.03,
+                  translationInterval: 0,
+                  scaleInterval: 0,
+                  animationDuration: Duration(milliseconds: 200),
                   onEnd: () {
                     if (gbindex % 2 != 0) gbindex++;
                   },
                   onSwipe: (int index, SwiperPosition position) {
-                    print(tmpexplo[index].name);
+                    print(listPlaceShow[index].name);
                     gbindex++;
                     print("gb index now" + gbindex.toString());
                     debugPrint("onSwipe $index $position");
@@ -251,19 +113,16 @@ class _ExploPageState extends State<ExploPage> with TickerProviderStateMixin {
                       explopagesave = false;
                     } else {
                       //dont know >> right button
-                      unknown(tmpexplo[index].id);
+                      unknown(listPlaceShow[index].id);
                       if (explopagesave) {
                         //save ID
                         explopagesave = false;
-                        saveIdplace(tmpexplo[index].id);
+                        saveIdplace(listPlaceShow[index].id);
                       }
                     }
                     //time to relaod
-                    if (gbindex % 2 == 0) {
-                      //print('reloading');
-                    }
                   },
-                  children: snapshot.data == null ? [] : snapshot.data,
+                  children: swiperList,
                 ));
           }),
     );

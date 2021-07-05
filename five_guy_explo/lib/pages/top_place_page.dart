@@ -136,7 +136,8 @@ class _TopPlacePageState extends State<TopPlacePage> {
                           child: Row(
                             children: [
                               Container(
-                                width: MediaQuery.of(context).size.width * 0.72,
+                                width:
+                                    MediaQuery.of(context).size.width * 0.501,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
